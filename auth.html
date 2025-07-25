@@ -234,74 +234,98 @@
             });
         });
 
-        // --- Signup Logic ---
-        signupForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const displayName = document.getElementById('signupName').value.trim();
-            const email = document.getElementById('signupEmail').value;
-            const password = document.getElementById('signupPassword').value;
+  // --- Signup Logic ---
+signupForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const displayName = document.getElementById('signupName').value.trim();
+    const email = document.getElementById('signupEmail').value;
+    const password = document.getElementById('signupPassword').value;
 
-            if (!displayName) {
-                authMessage.className = 'error';
-                authMessage.textContent = 'Please enter your name.';
-                return;
+    // --- NEW VALIDATION CHECKS ---
+    if (!displayName) {
+        authMessage.className = 'error';
+        authMessage.textContent = 'Please enter your name.';
+        return;
+    }
+    
+    // 🔥 CHECK FOR PASSWORD LENGTH
+    if (password.length < 6) {
+        authMessage.className = 'error';
+        authMessage.textContent = 'Password should be at least 6 characters long.';
+        return; // Stop the function here
+    }
+    // --- END OF VALIDATION ---
+
+    authMessage.textContent = ''; // Clear previous messages
+
+    auth.createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            const user = userCredential.user;
+            return user.updateProfile({
+                displayName: displayName
+            }).then(() => {
+                user.sendEmailVerification();
+                return db.collection('Users').doc(user.uid).set({
+                    displayName: displayName,
+                    email: user.email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            });
+        })
+        .then(() => {
+            authMessage.className = 'success';
+            authMessage.textContent = '✅ Account created! Please check your email to verify your address.';
+            signupForm.reset();
+        })
+        .catch(error => {
+            console.log('Signup error:', error.code, error.message); // Debug log
+            authMessage.className = 'error';
+            if (error.code === 'auth/email-already-in-use') {
+                authMessage.textContent = 'This email is already registered. Please login.';
+                setTimeout(() => {
+                    switchTab('loginForm');
+                    loginEmailInput.value = email;
+                }, 1500); // Delay switch to ensure message renders
+            } else if (error.code === 'auth/invalid-email') {
+                authMessage.textContent = 'Please enter a valid email address.';
+            } else {
+                authMessage.textContent = error.message;
             }
-
-            auth.createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    return user.updateProfile({
-                        displayName: displayName
-                    }).then(() => {
-                        return db.collection('Users').doc(user.uid).set({
-                            displayName: displayName,
-                            email: user.email,
-                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                    });
-                })
-                .then(() => {
-                    authMessage.className = 'success';
-                    authMessage.textContent = '✅ Signup successful! Redirecting to login...';
-                    signupForm.reset();
-                    
-                    setTimeout(() => {
-                        switchTab('loginForm');
-                        loginEmailInput.value = email;
-                        document.getElementById('loginPassword').focus();
-                    }, 2000);
-                })
-                .catch(error => {
-                    authMessage.className = 'error';
-                    if (error.code === 'auth/email-already-in-use') {
-                        authMessage.textContent = 'This email is already registered. Please login.';
-                        switchTab('loginForm');
-                        loginEmailInput.value = email;
-                    } else {
-                        authMessage.textContent = error.message;
-                    }
-                });
         });
+});
+     // --- Login Logic ---
+loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
 
-        // --- Login Logic ---
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-
-            auth.signInWithEmailAndPassword(email, password)
-                .then(() => {
-                    authMessage.className = 'success';
-                    authMessage.textContent = '✅ Login successful! Redirecting...';
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 1500);
-                })
-                .catch(error => {
-                    authMessage.className = 'error';
-                    authMessage.textContent = error.message;
-                });
+    auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            const user = userCredential.user;
+            
+            if (user.emailVerified) {
+                // If verified, login is successful.
+                authMessage.className = 'success';
+                authMessage.textContent = '✅ Login successful! Redirecting...';
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+            } else {
+                // If not verified, send a new link and inform the user.
+                authMessage.className = 'error';
+                authMessage.textContent = 'Your email is not verified. A new verification link has been sent to your inbox.';
+                
+                // 🔥 RESEND THE VERIFICATION EMAIL
+                user.sendEmailVerification(); 
+                
+                auth.signOut(); // Sign the user out until they are verified.
+            }
+        })
+        .catch(error => {
+            authMessage.className = 'error';
+            authMessage.textContent = error.message;
         });
+});
     </script>
 </body>
 </html>
