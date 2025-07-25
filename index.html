@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WORKLY - Real Work by Real People</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="enhanced-styles.css" />
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+  <script>
+    // Your Firebase configuration object
+    const firebaseConfig = {
+      apiKey: "AIzaSyCaxTPONihuF1G0DKaSVTKxuD35xAMRRbw",
+      authDomain: "workly-6e11f.firebaseapp.com",
+      projectId: "workly-6e11f",
+      storageBucket: "workly-6e11f.appspot.com",
+      messagingSenderId: "371385729011",
+      appId: "1:371385729011:web:65c352b17c25f1bcec5c86"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+  </script>
+</head>
+
+<body>
+  <header>
+    <div class="container header-content">
+      <h1>WORKLY</h1>
+      <p>Connecting people with real work.</p>
+      <button id="logoutBtn">Logout</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="main-content" id="mainContent">
+      <div class="left-section">
+        <h2>Post any work you need help with.</h2>
+        <p>
+          Whether it's hiring a driver, cleaner, or tutor — post your requirement here. Find real people ready to help.
+        </p>
+        <div class="action-buttons">
+            <button class="action-btn" id="giveWorkBtn">Post Your Work</button>
+            <button class="action-btn secondary" id="takeJobBtn">Find Available Work</button>
+        </div>
+         <div class="chat-buttons">
+            <button class="action-btn tertiary" id="ChatsBtn">💬 My Chats</button>
+            <button class="action-btn tertiary" id="myJobsBtn">📄 My Jobs</button>
+        </div>
+      </div>
+      <div class="right-section">
+        <img src="https://placehold.co/500x500/0052cc/FFFFFF?text=W&font=inter" alt="Workly Logo" class="logo big-logo" id="bigLogo" />
+      </div>
+    </div>
+
+    <!-- This section will be shown when a button is clicked -->
+    <div class="content-section" id="postJobSection">
+      <h3>📝 Submit Your Work Requirement</h3>
+      <form id="jobForm">
+        <input type="text" id="title" placeholder="e.g., Need a professional house cleaner" required>
+        <input type="text" id="location" placeholder="Location (City/Area)" required>
+        <input type="text" id="budget" placeholder="Your Budget / Offer" required>
+        <textarea id="description" placeholder="Describe the work clearly. The more details, the better." required></textarea>
+        <button type="submit" class="submit-btn">Submit</button>
+      </form>
+      <div id="form-message"></div>
+      <button class="back-btn" id="backToMainBtn1">← Go Back</button>
+    </div>
+
+    <div class="content-section" id="jobListingsSection">
+      <h3>🔍 Recently Posted Work</h3>
+      <div id="jobsContainer"></div>
+      <button class="back-btn" id="backToMainBtn2">← Go Back</button>
+    </div>
+  </main>
+
+  <div class="footer">
+    <p>© 2025 WORKLY. All rights reserved. | Support: <a href="mailto:teamanmade007@gmail.com">teamanmade007@gmail.com</a></p>
+  </div>
+
+  <!-- Floating Chat Window -->
+  <div id="floatingChatWindow">
+      <div class="chat-header">
+          <button id="backToAllChatsBtn" class="chat-nav-btn">←</button>
+          <span id="floatingChatTitle">Chat</span>
+          <button id="closeChatBtn" class="chat-nav-btn">×</button>
+      </div>
+      <div id="floatingChatContent"></div>
+      <div class="chat-footer">
+          <input type="text" id="floatingChatInput" placeholder="Type a message...">
+          <button id="floatingSendBtn">Send</button>
+      </div>
+  </div>
+  
+  <script>
+    // Basic navigation logic
+    document.getElementById('giveWorkBtn').addEventListener('click', () => {
+        document.getElementById('mainContent').style.display = 'none';
+        document.getElementById('postJobSection').style.display = 'block';
+    });
+    document.getElementById('takeJobBtn').addEventListener('click', () => {
+        document.getElementById('mainContent').style.display = 'none';
+        document.getElementById('jobListingsSection').style.display = 'block';
+    });
+    function goBackToMain() {
+        document.getElementById('mainContent').style.display = 'flex';
+        document.getElementById('postJobSection').style.display = 'none';
+        document.getElementById('jobListingsSection').style.display = 'none';
+    }
+    document.getElementById('backToMainBtn1').addEventListener('click', goBackToMain);
+    document.getElementById('backToMainBtn2').addEventListener('click', goBackToMain);
+    
+    // Firebase auth state listener
+    firebase.auth().onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = 'auth.html';
+      }
+    });
+
+    // Logout functionality
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      firebase.auth().signOut().then(() => {
+        window.location.href = 'auth.html';
+      });
+    });
+  </script>
+  <script src="enhanced-script.js"></script>
+</body>
+</html>

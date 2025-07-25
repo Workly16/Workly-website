@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Welcome to Workly</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script>
+        // Your Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyCaxTPONihuF1G0DKaSVTKxuD35xAMRRbw",
+          authDomain: "workly-6e11f.firebaseapp.com",
+          projectId: "workly-6e11f",
+          storageBucket: "workly-6e11f.appspot.com",
+          messagingSenderId: "371385729011",
+          appId: "1:371385729011:web:65c352b17c25f1bcec5c86"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+    </script>
+
+    <style>
+        :root {
+            --primary-color: #0052cc;
+            --secondary-color: #0065ff;
+            --accent-color: #36b37e;
+            --background-color: #f4f5f7;
+            --form-background: #ffffff;
+            --text-color: #172b4d;
+            --error-color: #de350b;
+            --success-color: #00875a;
+            --border-color: #dfe1e6;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .auth-container {
+            background-color: var(--form-background);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 4px 8px -2px rgba(9, 30, 66, 0.25), 0 0 1px rgba(9, 30, 66, 0.31);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .auth-logo {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 20px;
+            background: var(--primary-color);
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .auth-tabs {
+            display: flex;
+            justify-content: stretch;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .tab-btn {
+            flex-grow: 1;
+            background: none;
+            border: none;
+            padding: 15px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: #5e6c84;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            background-color: #fafbfc;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background-color: white;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background-color: #31a071;
+        }
+
+        #authMessage {
+            margin-top: 20px;
+            font-weight: 500;
+        }
+        .error { color: var(--error-color); }
+        .success { color: var(--success-color); }
+
+    </style>
+</head>
+<body>
+
+    <div class="auth-container">
+        <div class="auth-logo">W</div>
+        
+        <div class="auth-tabs">
+            <button class="tab-btn active" data-form="loginForm">Login</button>
+            <button class="tab-btn" data-form="signupForm">Sign Up</button>
+        </div>
+
+        <form id="loginForm" class="auth-form active">
+            <div class="input-group">
+                <input type="email" id="loginEmail" placeholder="Email" required>
+            </div>
+            <div class="input-group">
+                <input type="password" id="loginPassword" placeholder="Password" required>
+            </div>
+            <button type="submit" class="submit-btn">Login</button>
+        </form>
+
+        <form id="signupForm" class="auth-form">
+            <div class="input-group">
+                <input type="text" id="signupName" placeholder="Your Name" required>
+            </div>
+            <div class="input-group">
+                <input type="email" id="signupEmail" placeholder="Email" required>
+            </div>
+            <div class="input-group">
+                <input type="password" id="signupPassword" placeholder="Password" required>
+            </div>
+            <button type="submit" class="submit-btn">Create Account</button>
+        </form>
+
+        <div id="authMessage"></div>
+    </div>
+
+    <script>
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const authForms = document.querySelectorAll('.auth-form');
+        const authMessage = document.getElementById('authMessage');
+        const loginEmailInput = document.getElementById('loginEmail');
+        const signupForm = document.getElementById('signupForm');
+        const loginForm = document.getElementById('loginForm');
+
+        // --- Helper Function to switch tabs ---
+        function switchTab(tabName) {
+            const targetButton = document.querySelector(`.tab-btn[data-form="${tabName}"]`);
+            if (targetButton) {
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                targetButton.classList.add('active');
+
+                authForms.forEach(form => {
+                    form.classList.remove('active');
+                    if (form.id === tabName) {
+                        form.classList.add('active');
+                    }
+                });
+                authMessage.textContent = ''; // Clear messages on tab switch
+            }
+        }
+
+        // --- Event Listener for Tab Buttons ---
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                switchTab(button.dataset.form);
+            });
+        });
+
+        // --- Signup Logic ---
+        signupForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const displayName = document.getElementById('signupName').value.trim();
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+
+            if (!displayName) {
+                authMessage.className = 'error';
+                authMessage.textContent = 'Please enter your name.';
+                return;
+            }
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    return user.updateProfile({
+                        displayName: displayName
+                    }).then(() => {
+                        return db.collection('Users').doc(user.uid).set({
+                            displayName: displayName,
+                            email: user.email,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    });
+                })
+                .then(() => {
+                    authMessage.className = 'success';
+                    authMessage.textContent = '✅ Signup successful! Redirecting to login...';
+                    signupForm.reset();
+                    
+                    setTimeout(() => {
+                        switchTab('loginForm');
+                        loginEmailInput.value = email;
+                        document.getElementById('loginPassword').focus();
+                    }, 2000);
+                })
+                .catch(error => {
+                    authMessage.className = 'error';
+                    if (error.code === 'auth/email-already-in-use') {
+                        authMessage.textContent = 'This email is already registered. Please login.';
+                        switchTab('loginForm');
+                        loginEmailInput.value = email;
+                    } else {
+                        authMessage.textContent = error.message;
+                    }
+                });
+        });
+
+        // --- Login Logic ---
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then(() => {
+                    authMessage.className = 'success';
+                    authMessage.textContent = '✅ Login successful! Redirecting...';
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1500);
+                })
+                .catch(error => {
+                    authMessage.className = 'error';
+                    authMessage.textContent = error.message;
+                });
+        });
+    </script>
+</body>
+</html>
